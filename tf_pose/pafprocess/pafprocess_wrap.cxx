@@ -3427,10 +3427,10 @@ SWIG_AsVal_float (PyObject * obj, float *val)
     {
       for (i = 0; i < n-1; i++)
       {
-        snprintf(s, "%d, ", exact_dimensions[i]);
+        sprintf(s, "%d, ", exact_dimensions[i]);
         strcat(dims_str,s);
       }
-      snprintf(s, " or %d", exact_dimensions[n-1]);
+      sprintf(s, " or %d", exact_dimensions[n-1]);
       strcat(dims_str,s);
       PyErr_Format(PyExc_TypeError,
                    "Array must have %s dimensions.  Given array has %d dimensions",
@@ -3467,11 +3467,11 @@ SWIG_AsVal_float (PyObject * obj, float *val)
       {
         if (size[i] == -1)
         {
-          snprintf(s, "*,");
+          sprintf(s, "*,");
         }
         else
         {
-          snprintf(s, "%ld,", (long int)size[i]);
+          sprintf(s, "%ld,", (long int)size[i]);
         }
         strcat(desired_dims,s);
       }
@@ -3479,7 +3479,7 @@ SWIG_AsVal_float (PyObject * obj, float *val)
       desired_dims[len-1] = ']';
       for (i = 0; i < n; i++)
       {
-        snprintf(s, "%ld,", (long int)array_size(ary,i));
+        sprintf(s, "%ld,", (long int)array_size(ary,i));
         strcat(actual_dims,s);
       }
       len = strlen(actual_dims);

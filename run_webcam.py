@@ -41,6 +41,11 @@ if __name__ == '__main__':
         e = TfPoseEstimator(get_graph_path(args.model), target_size=(432, 368))
     logger.debug('cam read+')
     cam = cv2.VideoCapture(args.camera)
+
+    # Set the resolution to 640x480
+    cam.set(3, 640)  # 3 corresponds to the width
+    cam.set(4, 480)  # 4 corresponds to the height
+
     ret_val, image = cam.read()
     logger.info('cam image=%dx%d' % (image.shape[1], image.shape[0]))
 
