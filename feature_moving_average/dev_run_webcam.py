@@ -6,10 +6,25 @@ import cv2
 import numpy as np
 import pandas as pd
 
+from find_point import findPoint
+from get_moving_avg import getMovingAvg
+
+import sys
+import os
+
+# 현재 스크립트의 디렉토리를 가져옵니다.
+current_directory = os.path.dirname(os.path.abspath(__file__))
+
+# 부모 디렉토리(ildoonet-tf-pose-estimation)를 sys.path에 추가합니다.
+parent_directory = os.path.join(current_directory, '..')
+sys.path.append(parent_directory)
+
+# 이제 tf_pose 모듈을 import할 수 있습니다.
 from tf_pose.estimator import TfPoseEstimator
 from tf_pose.networks import get_graph_path, model_wh
 
-logger = logging.getLogger('TfPoseEstimator-WebCam')
+
+logger = logging.getLogger('Analyse Posture Using Moving Average')
 logger.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 ch.setLevel(logging.DEBUG)
@@ -19,38 +34,11 @@ logger.addHandler(ch)
 
 fps_time = 0
 
-# 座標を取得
-# p = 関節の番号
-def findPoint(humans, p):
-  for human in humans:
-    try:
-      body_part = human.body_parts[p]
-      parts = [0,0]
-
-      # 座標を整数に切り上げで置換
-      parts[0] = int(body_part.x * width + 0.5)
-      parts[1] = int(body_part.y * height + 0.5)
-
-      # parts = [x座標, y座標]
-      return parts
-    except:
-        pass
-
-# pandasで移動平均を返す
-def getMovingAvg(npArray):
-  if len(npArray)>0:
-    # pandasのdataFrameに埋める
-    df = pd.DataFrame(npArray)
-    # pandasのrollingメソッドで3区間の移動平均を返す
-    return df.rolling(window=3, min_periods=1).mean()
-  else:
-    return False
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='tf-pose-estimation realtime webcam')
     parser.add_argument('--camera', type=int, default=0)
 
-    parser.add_argument('--resize', type=str, default='0x0',
+    parser.add_argument('--resize', type=str, default='432x368',
                         help='if provided, resize images before they are processed. default=0x0, Recommends : 432x368 or 656x368 or 1312x736 ')
     parser.add_argument('--resize-out-ratio', type=float, default=4.0,
                         help='if provided, resize heatmaps before they are post-processed. default=1.0')
@@ -85,32 +73,24 @@ if __name__ == '__main__':
 
         # 検知された人間
         humans = e.inference(image, resize_to_default=(w > 0 and h > 0),upsample_size=args.resize_out_ratio)
-
+        logger.debug(f"humans: {humans}")
         # 高さと幅を取得
         height,width = image.shape[0],image.shape[1]
-
+        logger.debug(f"height: {height}")
+        logger.debug(f"width: {width}")
         # findPointは上記で記載した座標取得の関数です
         # 各地点の座標
-        left_ear = findPoint(humans, 17)
-        right_ear = findPoint(humans, 16)
-
-        left_eye = findPoint(humans, 15)
-        right_eye = findPoint(humans, 14)
-
-        nose = findPoint(humans, 0)
-
-        if len(left_ear) > 0:
-            lEarX_ndarray = np.array([])
-            lEarY_ndarray = np.array([])
-            lEarX_ndarray.append(left_ear[0])
-            lEarY_ndarray.append(left_ear[1])
-
-        if len(right_ear) > 0:
-            rEarX_ndarray = np.array([])
-            rEarY_ndarray = np.array([])
-            rEarX_ndarray.append(right_ear[0])
-            rEarY_ndarray.append(right_ear[1])
-
+        left_ear = findPoint(humans, 17, width, height)
+        right_ear = findPoint(humans, 16, width, height)
+        left_eye = findPoint(humans, 15, width, height)
+        right_eye = findPoint(humans, 14, width, height)
+    
+        # 값을 로그에 출력
+        logger.debug(f"left_ear: {left_ear}")
+        logger.debug(f"right_ear: {right_ear}")
+        logger.debug(f"left_eye: {left_eye}")
+        logger.debug(f"right_eye: {right_eye}")
+    
         logger.debug('show+')
         cv2.putText(image,
                     "FPS: %f" % (1.0 / (time.time() - fps_time)),
