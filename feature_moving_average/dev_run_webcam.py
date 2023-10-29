@@ -7,6 +7,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+import slackweb
+slack = slackweb.Slack(
+    url="https://hooks.slack.com/services/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")
+notify_text = "姿勢を正しましょう"
+
 from find_point import findPoint
 from get_moving_avg import getMovingAvg
 from visualize_moving_avg import visualizeMovingAvg
@@ -163,6 +168,7 @@ if __name__ == '__main__':
                 continue
             if not isGoodPosture(moving_avg_values[part]):
                 print(f"{part} 자세가 무너졌습니다.")
+                slack.notify(text=notify_text)
                 cv2.destroyAllWindows()
                 exit()  # 프로그램 종료
 
