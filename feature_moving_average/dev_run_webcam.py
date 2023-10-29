@@ -72,22 +72,14 @@ if __name__ == '__main__':
     cam = cv2.VideoCapture(args.camera)
     ret_val, image = cam.read()
 
-    # numpy 배열 초기화
-    # Ear
-    rEarX_ndarray = np.array([])
-    rEarY_ndarray = np.array([])
-    lEarX_ndarray = np.array([])
-    lEarY_ndarray = np.array([])
-
-    # Eye
-    rEyeX_ndarray = np.array([])
-    rEyeY_ndarray = np.array([])
-    lEyeX_ndarray = np.array([])
-    lEyeY_ndarray = np.array([])
-
-    # Nose
-    NoseX_ndarray = np.array([])
-    NoseY_ndarray = np.array([])
+    # Initialize dictionaries for each body part's coordinates
+    coordinates = {
+        'rEar': [],
+        'lEar': [],
+        'rEye': [],
+        'lEye': [],
+        'Nose': []
+    }
     
     while True:
         ret_val, image = cam.read()
@@ -109,40 +101,30 @@ if __name__ == '__main__':
         right_eye = findPoint(humans, 14, width, height)
         nose = findPoint(humans, 0, width, height)
 
-        # nose 처리
+        # nose 좌표 처리
         if nose is not None and len(nose) > 0:
-            NoseX_ndarray = np.append(NoseX_ndarray, nose[0])
-            NoseY_ndarray = np.append(NoseY_ndarray, nose[1])
-            logger.debug(f"nose_x: {NoseX_ndarray}")
-            logger.debug(f"nose_y: {NoseY_ndarray}")
-        
-        # left_ear 처리
+            coordinates['Nose'].append(nose)
+            logger.debug(f"nose: {coordinates['Nose']}")
+
+        # left_ear 좌표 처리
         if left_ear is not None and len(left_ear) > 0:
-            lEarX_ndarray = np.append(lEarX_ndarray, left_ear[0])
-            lEarY_ndarray = np.append(lEarY_ndarray, left_ear[1])
-            logger.debug(f"left_ear_x: {lEarX_ndarray}")
-            logger.debug(f"left_ear_y: {lEarY_ndarray}")
+            coordinates['lEar'].append(left_ear)
+            logger.debug(f"left_ear: {coordinates['lEar']}")
 
-        # right_ear 처리
+        # right_ear 좌표 처리
         if right_ear is not None and len(right_ear) > 0:
-            rEarX_ndarray = np.append(rEarX_ndarray, right_ear[0])
-            rEarY_ndarray = np.append(rEarY_ndarray, right_ear[1])
-            logger.debug(f"right_ear_x: {rEarX_ndarray}")
-            logger.debug(f"right_ear_y: {rEarY_ndarray}")
+            coordinates['rEar'].append(right_ear)
+            logger.debug(f"right_ear: {coordinates['rEar']}")
 
-        # left_eye 처리
+        # left_eye 좌표 처리
         if left_eye is not None and len(left_eye) > 0:
-            lEyeX_ndarray = np.append(lEyeX_ndarray, left_eye[0])
-            lEyeY_ndarray = np.append(lEyeY_ndarray, left_eye[1])
-            logger.debug(f"left_eye_x: {lEyeX_ndarray}")
-            logger.debug(f"left_eye_y: {lEyeY_ndarray}")
+            coordinates['lEye'].append(left_eye)
+            logger.debug(f"left_eye: {coordinates['lEye']}")
 
-        # right_eye 처리
+        # right_eye 좌표 처리
         if right_eye is not None and len(right_eye) > 0:
-            rEyeX_ndarray = np.append(rEyeX_ndarray, right_eye[0])
-            rEyeY_ndarray = np.append(rEyeY_ndarray, right_eye[1])
-            logger.debug(f"right_eye_x: {rEyeX_ndarray}")
-            logger.debug(f"right_eye_y: {rEyeY_ndarray}")
+            coordinates['rEye'].append(right_eye)
+            logger.debug(f"right_eye: {coordinates['rEye']}")
 
         logger.debug('show+')
         cv2.putText(image,
