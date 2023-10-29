@@ -73,16 +73,22 @@ if __name__ == '__main__':
     ret_val, image = cam.read()
 
     # numpy 배열 초기화
+    # Ear
     rEarX_ndarray = np.array([])
     rEarY_ndarray = np.array([])
     lEarX_ndarray = np.array([])
     lEarY_ndarray = np.array([])
 
+    # Eye
     rEyeX_ndarray = np.array([])
     rEyeY_ndarray = np.array([])
     lEyeX_ndarray = np.array([])
     lEyeY_ndarray = np.array([])
 
+    # Nose
+    NoseX_ndarray = np.array([])
+    NoseY_ndarray = np.array([])
+    
     while True:
         ret_val, image = cam.read()
 
@@ -101,7 +107,15 @@ if __name__ == '__main__':
         right_ear = findPoint(humans, 16, width, height)
         left_eye = findPoint(humans, 15, width, height)
         right_eye = findPoint(humans, 14, width, height)
+        nose = findPoint(humans, 0, width, height)
 
+        # nose 처리
+        if nose is not None and len(nose) > 0:
+            NoseX_ndarray = np.append(NoseX_ndarray, nose[0])
+            NoseY_ndarray = np.append(NoseY_ndarray, nose[1])
+            logger.debug(f"nose_x: {NoseX_ndarray}")
+            logger.debug(f"nose_y: {NoseY_ndarray}")
+        
         # left_ear 처리
         if left_ear is not None and len(left_ear) > 0:
             lEarX_ndarray = np.append(lEarX_ndarray, left_ear[0])
@@ -140,5 +154,7 @@ if __name__ == '__main__':
         if cv2.waitKey(1) == 27:
             break
         logger.debug('finished+')
+        
+        time.sleep(10)  # 10초 동안 일시 중지
 
     cv2.destroyAllWindows()
