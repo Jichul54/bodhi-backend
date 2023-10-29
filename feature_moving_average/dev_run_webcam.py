@@ -5,10 +5,12 @@ import time
 import cv2
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 from find_point import findPoint
 from get_moving_avg import getMovingAvg
 from visualize_moving_avg import visualizeMovingAvg
+from is_good_posture import isGoodPosture
 
 import sys
 import os
@@ -97,11 +99,11 @@ if __name__ == '__main__':
         # 検知された人間
         humans = e.inference(image, resize_to_default=(
             w > 0 and h > 0), upsample_size=args.resize_out_ratio)
-        logger.debug(f"humans: {humans}")
+        # logger.debug(f"humans: {humans}")
         # 高さと幅を取得
         height, width = image.shape[0], image.shape[1]
-        logger.debug(f"height: {height}")
-        logger.debug(f"width: {width}")
+        # logger.debug(f"height: {height}")
+        # logger.debug(f"width: {width}")
 
         # findPointは上記で記載した座標取得の関数です
         # 各地点の座標
@@ -145,8 +147,8 @@ if __name__ == '__main__':
             moving_avg_values[body_part].append([x_mean, y_mean])
 
         # 이동평균값 로그 출력
-        for key, value in moving_avg_values.items():
-            print(f"{key}: {value}")
+        # for key, value in moving_avg_values.items():
+        #     print(f"{key}: {value}")
 
         logger.debug('show+')
         cv2.putText(image,
@@ -155,11 +157,21 @@ if __name__ == '__main__':
                     (0, 255, 0), 2)
         cv2.imshow('tf-pose-estimation result', image)
         fps_time = time.time()
+
+        for part in moving_avg_values.keys():
+            if not moving_avg_values[part]:  # 리스트가 비어있으면 스킵
+                continue
+            if not isGoodPosture(moving_avg_values[part]):
+                print(f"{part} 자세가 무너졌습니다.")
+                cv2.destroyAllWindows()
+                exit()  # 프로그램 종료
+
         if cv2.waitKey(1) == 27:
             break
         logger.debug('finished+')
 
         visualizeMovingAvg(moving_avg_values)
-        time.sleep(1)  # 1초 동안 일시 중지
 
+        time.sleep(1)  # 1초 동안 일시 중지
+    
     cv2.destroyAllWindows()
