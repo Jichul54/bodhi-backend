@@ -8,6 +8,7 @@ import pandas as pd
 
 from find_point import findPoint
 from get_moving_avg import getMovingAvg
+from visualize_moving_avg import visualizeMovingAvg
 
 import sys
 import os
@@ -158,6 +159,7 @@ if __name__ == '__main__':
             break
         logger.debug('finished+')
 
+        visualizeMovingAvg(moving_avg_values)
         time.sleep(1)  # 1초 동안 일시 중지
 
     cv2.destroyAllWindows()
