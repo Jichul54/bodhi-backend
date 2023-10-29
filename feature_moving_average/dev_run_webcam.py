@@ -20,8 +20,8 @@ parent_directory = os.path.join(current_directory, '..')
 sys.path.append(parent_directory)
 
 # 이제 tf_pose 모듈을 import할 수 있습니다.
-from tf_pose.estimator import TfPoseEstimator
 from tf_pose.networks import get_graph_path, model_wh
+from tf_pose.estimator import TfPoseEstimator
 
 
 logger = logging.getLogger('Analyse Posture Using Moving Average')
@@ -81,6 +81,15 @@ if __name__ == '__main__':
         'Nose': []
     }
     
+    # Initialize dictionary to store moving average values for each body part as 2D array
+    moving_avg_values = {
+        'rEar': [],
+        'lEar': [],
+        'rEye': [],
+        'lEye': [],
+        'Nose': []
+    }
+
     while True:
         ret_val, image = cam.read()
 
@@ -104,27 +113,39 @@ if __name__ == '__main__':
         # nose 좌표 처리
         if nose is not None and len(nose) > 0:
             coordinates['Nose'].append(nose)
-            logger.debug(f"nose: {coordinates['Nose']}")
 
         # left_ear 좌표 처리
         if left_ear is not None and len(left_ear) > 0:
             coordinates['lEar'].append(left_ear)
-            logger.debug(f"left_ear: {coordinates['lEar']}")
 
         # right_ear 좌표 처리
         if right_ear is not None and len(right_ear) > 0:
             coordinates['rEar'].append(right_ear)
-            logger.debug(f"right_ear: {coordinates['rEar']}")
 
         # left_eye 좌표 처리
         if left_eye is not None and len(left_eye) > 0:
             coordinates['lEye'].append(left_eye)
-            logger.debug(f"left_eye: {coordinates['lEye']}")
 
         # right_eye 좌표 처리
         if right_eye is not None and len(right_eye) > 0:
             coordinates['rEye'].append(right_eye)
-            logger.debug(f"right_eye: {coordinates['rEye']}")
+
+        for body_part, coords in coordinates.items():
+            moving_avg = getMovingAvg(coords)
+
+            if isinstance(moving_avg, bool) and not moving_avg:  # moving_avg가 False인 경우
+                continue  # 현재 루프를 스킵하고 다음 루프로 이동
+
+            # X와 Y의 평균값을 각각의 변수에 저장
+            x_mean = moving_avg[0].mean()
+            y_mean = moving_avg[1].mean()
+
+            # Append the moving average values to the respective list as [x, y]
+            moving_avg_values[body_part].append([x_mean, y_mean])
+
+        # 이동평균값 로그 출력
+        for key, value in moving_avg_values.items():
+            print(f"{key}: {value}")
 
         logger.debug('show+')
         cv2.putText(image,
@@ -136,7 +157,7 @@ if __name__ == '__main__':
         if cv2.waitKey(1) == 27:
             break
         logger.debug('finished+')
-        
-        time.sleep(10)  # 10초 동안 일시 중지
+
+        time.sleep(1)  # 1초 동안 일시 중지
 
     cv2.destroyAllWindows()
