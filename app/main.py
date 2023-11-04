@@ -1,4 +1,5 @@
 from fastapi import FastAPI, File, UploadFile, Form
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import uvicorn
 import numpy as np
@@ -17,6 +18,15 @@ from feature_moving_average.get_moving_avg import getMovingAvg
 from feature_moving_average.is_good_posture import isGoodPosture
 
 app = FastAPI()
+
+# 모든 출처를 허용하는 CORS 미들웨어를 추가합니다.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 모든 도메인을 허용합니다. 실제 배포시에는 정확한 도메인을 명시하는 것이 좋습니다.
+    allow_credentials=True,
+    allow_methods=["*"],  # 모든 HTTP 메소드를 허용합니다.
+    allow_headers=["*"],  # 모든 HTTP 헤더를 허용합니다.
+)
 
 # OpenPose 모델 설정
 model = 'mobilenet_thin'
