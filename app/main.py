@@ -60,6 +60,8 @@ async def analyze_image(file: UploadFile = File(...), data: str = Form(...)):
     
     # Calculate moving averages
     for body_part, coords in coordinates.items():
+        if body_part not in moving_avg_values:
+            moving_avg_values[body_part] = [] 
         moving_avg = getMovingAvg(coords)
 
         if isinstance(moving_avg, bool) and not moving_avg:  # moving_avg가 False인 경우
